@@ -15,6 +15,7 @@ if __name__ == '__main__' :
     cur_price = pyupbit.get_current_price(ticker)
     price = pyupbit.get_tick_size(price=cur_price * 0.7) # 70% price
     temp = app.buy_limit_order(ticker=ticker, price=price, volume=10)
+    print(temp)
 
     # check it
     buy_limit_uuid = None
@@ -26,8 +27,8 @@ if __name__ == '__main__' :
         else:
             print("not delivered..?")
             print_dict(temp)
-    except Exception as x:
-        print(x.__class__.__name__)
+    except Exception as e:
+        print(f"An exception occurred: {type(e).__name__}: {e}")
 
     time.sleep(5)
     """

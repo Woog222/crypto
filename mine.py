@@ -1,56 +1,45 @@
-import pyupbit
-import config.config
-import time
-from tools.helper import *
-
-ticker = "KRW-SUI"
-app = pyupbit.Upbit(access=config.config.ACCESS_KEY, secret=config.config.SECRET_KEY)
-
-"""
-# 1. buy
-print("-------------------- buy limit ---------------------")
-cur_price = pyupbit.get_current_price(ticker)
-price = pyupbit.get_tick_size(price=cur_price*0.9)
-temp = app.buy_limit_order(ticker = ticker, price= price, volume = 10)
-print_dict(temp)
-uuid = temp['uuid']
-
-time.sleep(5)
-
-# 2. buy cancel
-print("--------------------- buy cancel ------------------")
-temp = app.cancel_order(uuid=uuid)
-
-print_dict(temp)
-
-print("-------------------- sell limit ---------------------")
-cur_price = pyupbit.get_current_price(ticker)
-price = pyupbit.get_tick_size(price=cur_price*1.2)
-
-balance = app.get_balance(ticker)
-
-temp = app.sell_limit_order(ticker=ticker, price=price, volume=balance)
-print_dict(temp)
-uuid = temp['uuid']
-time.sleep(5)
+import jwt  # PyJWT
+import uuid, os, sys
+import websocket  # websocket-client
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+import config.config as CONFIG
 
 
-print("--------------------- sell cancel ------------------")
-temp = app.cancel_order(uuid=uuid)
-
-print_dict(temp)
-"""
-
-print("-------------------- buy market ---------------------")
+def on_message(ws, message):
+    # do something
+    data = message.decode('utf-8')
+    print(data)
 
 
-temp = app.buy_market_order(ticker=ticker, price=10000)
-print_dict(temp)
-uuid = temp['uuid']
-time.sleep(5)
+def on_connect(ws):
+    print("connected!")
+    # Request after connection
+    ws.send('[{"ticket":"test example"},{"type":"myTrade"}]')
 
 
-print("--------------------- sell market ------------------")
-temp = app.sell_market_order(ticker=ticker, volume=app.get_balance(ticker=ticker))
+def on_error(ws, err):
+    print(err)
 
-print_dict(temp)
+
+def on_close(ws, status_code, msg):
+    print("closed!")
+
+
+payload = {
+    'access_key': CONFIG.ACCESS_KEY,
+    'nonce': str(uuid.uuid4()),
+}
+
+jwt_token = jwt.encode(payload, CONFIG.SECRET_KEY)
+authorization_token = 'Bearer {}'.format(jwt_token)
+headers = {"Authorization": authorization_token}
+
+ws_app = websocket.WebSocketApp("wss://api.upbit.com/websocket/v1",
+                                header=headers,
+                                on_message=on_message,
+                                on_open=on_connect,
+                                on_error=on_error,
+                                on_close=on_close)
+
+
+ws_app.run_forever()
