@@ -29,7 +29,7 @@ class Stock(metaclass=ABCMeta):
         self.budget = float(budget)
         self.buy_price = float(buy_price)
         self.stop_loss = float(pyupbit.get_tick_size(buy_price * 0.95))
-        self.profit_loss = float(pyupbit.get_tick_size(buy_price * 1.01))
+        self.profit_loss = float(pyupbit.get_tick_size(buy_price * 1.03))
         self.shareHeld = 0.0
 
         chance = app.get_chance(ticker=ticker)
