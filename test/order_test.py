@@ -2,20 +2,32 @@ import pyupbit, time, sys, os
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 import config.config as CONFIG
 from tools.helper import *
+from tools.Monitor import Monitor
+from simple1.order import Order
 
 ticker = "KRW-SUI"
+cur_price = pyupbit.get_current_price(ticker)
 app = pyupbit.Upbit(access=CONFIG.ACCESS_KEY, secret=CONFIG.SECRET_KEY)
 
 
 if __name__ == '__main__' :
+    monitor = Monitor(access_key=CONFIG.ACCESS_KEY, secret_key=CONFIG.SECRET_KEY)
+    monitor.start()
     """
         1. buy
     """
-    print("1. buy limit : ", end="")
-    cur_price = pyupbit.get_current_price(ticker)
-    price = pyupbit.get_tick_size(price=cur_price * 0.7) # 70% price
-    temp = app.buy_limit_order(ticker=ticker, price=price, volume=10)
-    print(temp)
+    print("1. buy limit : ", end=""); time.sleep(3)
+    buy_price = pyupbit.get_tick_size(price=cur_price * 0.7) # 70% price
+    temp = app.buy_limit_order(ticker=ticker, price=buy_price, volume=10)
+    buy_order = Order(
+        ticker=temp["market"],
+        uuid = temp["uuid"],
+        price = temp["price"],
+        ord_type = "BID" if temp["side"] == "bid" else "ASK",
+        volume = temp["volume"],
+        remaining_volume= temp["remaining_volume"]
+    )
+    print(buy_order)
 
     # check it
     buy_limit_uuid = None
@@ -53,6 +65,7 @@ if __name__ == '__main__' :
     """
     print("3. buy market : ", end="")
     temp = app.buy_market_order(ticker=ticker, price=10000)
+    print_dict(temp)
     time.sleep(3)
     # check it
     try:
@@ -87,11 +100,20 @@ if __name__ == '__main__' :
     try:
         sell_limit_uuid = temp['uuid']
         temp = app.get_order(ticker_or_uuid=sell_limit_uuid)
+        sell_order = Order(
+            ticker=temp["market"],
+            uuid=temp["uuid"],
+            price=temp["price"],
+            ord_type="BID" if temp["side"] == "bid" else "ASK",
+            volume=temp["volume"],
+            remaining_volume=temp["remaining_volume"]
+        )
         if temp['uuid'] == sell_limit_uuid and temp['state'] == 'wait':
             print("well delivered")
         else:
             print("not delivered..?")
             print_dict(temp)
+        print(sell_order)
     except Exception as x:
         print(x.__class__.__name__)
     time.sleep(5)
@@ -119,6 +141,7 @@ if __name__ == '__main__' :
     """
     print("6. sell market : ", end="")
     temp = app.sell_market_order(ticker=ticker, volume=app.get_balance(ticker=ticker))
+    print_dict(temp)
     time.sleep(3)
     # check it
     try:
@@ -135,3 +158,4 @@ if __name__ == '__main__' :
     # check balance
     temp = app.get_balance(ticker=ticker)
     print(f"{ticker} balance : {temp} now.")
+    monitor.terminate()

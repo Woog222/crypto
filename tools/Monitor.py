@@ -15,8 +15,7 @@ class Monitor(mp.Process):
         self.secret_key = secret_key
         self.__q = mp.Queue(qsize)
         self.alive = False
-        super().__init__()
-
+        super().__init__(daemon=True)
 
     def run(self):
         payload = {
@@ -39,9 +38,6 @@ class Monitor(mp.Process):
         self.wsocket.run_forever(ping_interval=10)
 
     def get(self, timeout:float = -1):
-        if not self.alive:
-            self.alive = True
-            self.start()
         try:
             return self.__q.get(timeout=timeout)
         except Exception as e:
