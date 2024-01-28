@@ -49,7 +49,7 @@ class Trader(threading.Thread):
             self.trade_update()
             del_list = []
             for stock in self.stocks.values():
-                if not self.stock.is_on_buy() and self.app.get_balance(stock.ticker )<= 0:
+                if not stock.is_on_buy() and self.app.get_balance(stock.ticker )<= 0:
                     del_list.append(stock.ticker)
             for ticker in del_list: self.stocks.pop(ticker)
 
