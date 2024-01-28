@@ -1,6 +1,5 @@
 import sys, os, jwt, hashlib, requests, uuid, math
 from urllib.parse import urlencode, unquote
-
 import pyupbit
 
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))

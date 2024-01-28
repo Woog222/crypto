@@ -11,7 +11,8 @@ if __name__ == '__main__':
     trader = Trader(app=app, monitor=monitor)
 
     trader.go()
-    trader.add_stock(ticker="KRW-BTC", budget = 6000, buy_price = 57421000)
+    trader.add_stock(ticker="KRW-BTC", budget = 6000,
+                     buy_price = 58361000)
 
 
     while True:
